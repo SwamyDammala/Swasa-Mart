@@ -1,0 +1,27 @@
+.total-price {
+  background-color: rgb(107, 185, 159);
+  font-weight: bold;
+  border-top-left-radius: 55px;
+  border-bottom-left-radius: 45px;
+  font-size: 30px;
+  padding: 20px;
+}
+
+.total-price:hover {
+  background-color: aqua;
+}
+
+.prodImg {
+  transition: transform 0.2s; /* Animation */
+  width: 120px;
+  height: 120px;
+  margin: 0 auto;
+}
+
+.prodImg:hover {
+  transform: scale(1.2);
+}
+
+.mt-2{
+  margin-top:0.5rem !important
+}

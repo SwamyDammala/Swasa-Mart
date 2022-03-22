@@ -1,0 +1,23 @@
+.navbar {
+  background-color: #70dcdc !important;
+}
+
+.navbar-brand {
+  color: whitesmoke !important;
+  font-weight: bold;
+  font-size: 2rem;
+}
+
+.nav-link {
+  color: whitesmoke !important;
+  font-size: 1rem !important;
+  font-weight: bold;
+}
+
+.header {
+  top: 0;
+  left: 0;
+  right: 0px;
+  z-index: 2;
+  position: fixed;
+}

@@ -1,0 +1,21 @@
+/* .admin_nav-link{
+    background-color: black;
+} */
+
+/* .nav-item{
+    color: red;
+    background-color: black;
+    border-color: #dee2e6 #dee2e6 #fff;
+} */
+
+ .nav-tabs .nav-link{
+    margin-bottom: -1px;
+    background-color: #187c93;
+    border: 1px solid transparent;
+    border-top-left-radius: 0.25rem;
+    border-top-right-radius: 0.25rem;
+}
+
+.nav-tabs .nav-link.active{
+    background-color: #56b7a7;
+}
