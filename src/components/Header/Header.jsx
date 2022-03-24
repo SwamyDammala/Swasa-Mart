@@ -7,13 +7,15 @@ import "./Header.css";
 const Header = () => {
   //To get cart Items from redux store
   const { cartItems } = useSelector((state) => ({
-    cartItems: state.cartReducer.cartItems,
+    cartItems: state.cartReducer,
   }));
+
 
   //To get the current user details from local store to show the current user
   const loginUser = JSON.parse(localStorage.getItem("loginUser"));
   const currentUser =
     loginUser && loginUser.email.substring(0, loginUser.email.length - 10);
+  const currentUserCartItems=cartItems.filter(cartitem=>cartitem.currentUserInfo.userId===loginUser.uid)
 
   //Logout method to logout from current user session and removing login user details from store
   //also make the currnt sesson reload
@@ -57,7 +59,7 @@ const Header = () => {
                   </li>
                   <li className="nav-item">
                     <Link to="/cart" className="nav-link">
-                      <FaCartPlus /> {cartItems && cartItems.length}
+                      <FaCartPlus /> {currentUserCartItems && currentUserCartItems.length}
                     </Link>
                   </li>
                   <li className="nav-item">

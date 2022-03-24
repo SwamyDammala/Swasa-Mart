@@ -18,11 +18,10 @@ const OrdersHistory=(props)=> {
     try {
       const userId = JSON.parse(localStorage.getItem("loginUser")).uid;
       const currentUserOrdersData = await getDocs(collection(db, "orders"));
-      setIsLoading(false);
       const ordersArr = [];
       currentUserOrdersData.forEach((order) => {
         if (order.data().userId === userId) {
-          order.data().cartItems.forEach((orderedItem) => {
+          order.data().currentUserCartItems.forEach((orderedItem) => {
             ordersArr.push(orderedItem);
           });
         }
@@ -54,16 +53,16 @@ const OrdersHistory=(props)=> {
                   <tr key={order.id}>
                     <td>
                       <img
-                        src={order.image}
+                        src={order.prod.image}
                         alt="prodImage"
                         className="prodImg"
                       />
                     </td>
                     <td>
-                      <strong>{order.title}</strong>
+                      <strong>{order.prod.title}</strong>
                     </td>
                     <td>
-                      <strong>{order.price}</strong>
+                      <strong>{order.prod.price}</strong>
                     </td>
                   </tr>
                 );

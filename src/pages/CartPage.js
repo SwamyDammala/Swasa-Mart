@@ -4,17 +4,23 @@ import Layout from "../components/Layout/Layout";
 import { collection, addDoc } from "firebase/firestore/lite";
 import { db } from "../firebase/firebase";
 import { useDispatch } from "react-redux";
-import { removeItemsFromCart } from "../redux/actions/actions";
+import { startRemoveItemsFromCart } from "../redux/actions/actions";
 import Modal from "../components/Modal/modal";
 import { FaTrash } from "react-icons/fa";
 import { toast } from "react-toastify";
 import "./styles/cartpage.css";
+import { Link } from "react-router-dom";
 
 const CartPage = () => {
   //To get the cart items from redux store
   const { cartItems } = useSelector((state) => ({
-    cartItems: state.cartReducer.cartItems,
+    cartItems: state.cartReducer,
   }));
+
+  const { email } = JSON.parse(localStorage.getItem("loginUser"))
+  const userId=JSON.parse(localStorage.getItem("loginUser")).uid
+
+  const currentUserCartItems=cartItems.filter(cartitem=>cartitem.currentUserInfo.userId===userId)
 
   const [totalPrice, setTotalPrice] = useState(0);
   //State variable for checkout modal window
@@ -30,18 +36,17 @@ const CartPage = () => {
 
   //Delete product from cart
   const removeProdFromCart = (id) => {
-    dispatch(removeItemsFromCart(id));
+    dispatch(startRemoveItemsFromCart(id));
   };
 
   //to get the total price of all products in cart Page
   useEffect(() => {
-    localStorage.setItem("cartItems", JSON.stringify(cartItems));
     let tempPrice = 0;
-    cartItems.forEach((prod) => {
-      tempPrice += prod.price;
+    currentUserCartItems.forEach((product) => {
+      tempPrice += product.prod.price;
     });
     setTotalPrice(tempPrice);
-  }, [cartItems]);
+  }, [currentUserCartItems]);
 
   //To toggle the Modal pop up
   const handleModal = () => {
@@ -72,24 +77,27 @@ const CartPage = () => {
   const handlePlaceOrder = async () => {
     const deliveryAddress = { name, address, pincode, mobileNum };
     const orderInfo = {
-      cartItems: JSON.parse(localStorage.getItem("cartItems")),
-      email: JSON.parse(localStorage.getItem("loginUser")).email,
-      userId: JSON.parse(localStorage.getItem("loginUser")).uid,
+      currentUserCartItems,
+      email,
+      userId,
       deliveryAddress,
     };
-    if (orderInfo.deliveryAddress && orderInfo.cartItems) {
+    if (orderInfo.deliveryAddress && orderInfo.currentUserCartItems) {
       try {
         setIsLoading(true);
-        await addDoc(collection(db, "orders"), orderInfo).then(() =>
-          localStorage.removeItem("cartItems")
-        );
+        await addDoc(collection(db, "orders"), orderInfo)
         setIsLoading(false);
+        //Removing cart items from cart after ordering the items
+        currentUserCartItems.forEach((cartitem) => {
+          removeProdFromCart(cartitem.id)
+        })
         toast.success("Order Placed Succesfully");
         handleModal();
       } catch (error) {
         toast.error("Order failed");
         setIsLoading(false);
         handleModal();
+        console.log(error)
       }
     }
   };
@@ -142,37 +150,41 @@ const CartPage = () => {
   };
   return (
     <Layout loading={isLoading}>
-      <table className="table mt-2">
-        <thead>
-          <tr>
-            <th>Image</th>
-            <th>Name</th>
-            <th>Price</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
-          {cartItems &&
-            cartItems.map((prod) => {
+      {currentUserCartItems.length > 0 ?
+        <>
+        <table className="table mt-2">
+          <thead>
+            <tr>
+              <th>Image</th>
+              <th>Name</th>
+              <th>Price</th>
+              <th>Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            {currentUserCartItems.map((product) => {
               return (
                 <tr>
                   <td>
-                    <img src={prod.image} alt="prodImage" className="prodImg" />
+                    <Link to={`/productInfo/${product.prod.id}`}>
+                    <img src={product.prod.image} alt="prodImage" className="prodImg" />
+                  </Link>
                   </td>
                   <td>
-                    <strong>{prod.title}</strong>
+                    <strong>{product.prod.title}</strong>
                   </td>
                   <td>
-                    <strong>{prod.price}</strong>
+                    <strong>{product.prod.price}Rs/-</strong>
                   </td>
                   <td>
-                    <FaTrash onClick={() => removeProdFromCart(prod)} />
+                    <FaTrash onClick={() => removeProdFromCart(product.id)} />
                   </td>
                 </tr>
               );
             })}
-        </tbody>
-      </table>
+          </tbody>
+        </table>
+       
       <div className="d-flex justify-content-end">
         <h1 className="total-price">
           Total Amount:<strong> {totalPrice}</strong> RS/-
@@ -189,7 +201,9 @@ const CartPage = () => {
           confirmBtn="Order Item"
         />
         <button onClick={popUpModal}>PLACE ORDER</button>
-      </div>
+          </div>
+        </>
+         :<h3 className="mt-2">No Items in your Cart</h3>}
     </Layout>
   );
 };

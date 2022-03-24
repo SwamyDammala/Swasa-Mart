@@ -5,7 +5,7 @@ import { db } from "../firebase/firebase";
 import { collection, getDocs } from "firebase/firestore/lite";
 import ProductInfo from "./ProductInfo";
 import { useDispatch } from "react-redux";
-import { addItemsToCart } from "../redux/actions/actions";
+import { startAddItemsToCart } from "../redux/actions/actions";
 import { useSelector } from "react-redux";
 import "./styles/productstyle.css";
 
@@ -17,6 +17,12 @@ const HomePage = () => {
 
   const [searchProduct, setSearchProduct] = useState("");
   const [filterByCategory, setFilterByCategory] = useState("");
+
+  //Current Login user Session details
+  const currentUserInfo={
+    email: JSON.parse(localStorage.getItem("loginUser")).email,
+    userId: JSON.parse(localStorage.getItem("loginUser")).uid,
+  }
 
   const dispatch = useDispatch();
   const { cartItems } = useSelector((state) => ({
@@ -74,6 +80,16 @@ const HomePage = () => {
   const allProductsCatergories = products.length > 0 && [
     ...new Set(products.map((product) => product.category)),
   ];
+
+  //Handle method for Adding cart items to database
+  const addItemsToCartMethod =  (prod) => {
+    const cartInfo = {
+      currentUserInfo,
+      prod
+    }
+    dispatch(startAddItemsToCart(cartInfo))
+    console.log(cartInfo)
+  }
 
   return (
     <Layout loading={isLoading}>
@@ -135,7 +151,7 @@ const HomePage = () => {
                         </h2>
                         <div className="d-flex">
                           <button
-                            onClick={() => dispatch(addItemsToCart(product))}
+                            onClick={() => addItemsToCartMethod(product)}
                             className="button mx-2 mb-1"
                           >
                             Add To Cart
@@ -154,7 +170,6 @@ const HomePage = () => {
               })}
         </div>
       </div>
-      <ProductInfo prodId={productId} />
     </Layout>
   );
 };

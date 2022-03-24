@@ -5,7 +5,7 @@ import { doc, getDoc } from "firebase/firestore/lite";
 import { useParams } from "react-router";
 import Layout from "../components/Layout/Layout";
 import { useDispatch } from "react-redux";
-import { addItemsToCart } from "../redux/actions/actions";
+import {  startAddItemsToCart } from "../redux/actions/actions";
 import { db } from "../firebase/firebase";
 
 const ProductInfo = (props) => {
@@ -32,6 +32,21 @@ const ProductInfo = (props) => {
       setIsLoading(false);
     }
   };
+
+   //Current Login user Session details
+   const currentUserInfo={
+    email: JSON.parse(localStorage.getItem("loginUser")).email,
+    userId: JSON.parse(localStorage.getItem("loginUser")).uid,
+  }
+
+  //Handle method for Adding cart items to database
+  const addItemsToCartMethod =  (prod) => {
+    const cartInfo = {
+      currentUserInfo,
+      prod
+    }
+    dispatch(startAddItemsToCart(cartInfo))
+  }
 
   return (
     <Layout loading={isLoading}>
@@ -71,7 +86,7 @@ const ProductInfo = (props) => {
                 <div className="d-flex justify-content-end ml-3">
                   <button
                     className="button my-3"
-                    onClick={() => dispatch(addItemsToCart(product))}
+                    onClick={() =>addItemsToCartMethod(product)}
                   >
                     Add To Cart
                   </button>
