@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { FaCartPlus } from "react-icons/fa";
 import { useSelector } from "react-redux";
@@ -9,13 +9,29 @@ const Header = () => {
   const { cartItems } = useSelector((state) => ({
     cartItems: state.cartReducer,
   }));
+  console.log(cartItems)
+
+  //State varibale for CartItem count
+
+  const [cartItemCount, setCartItemCount] = useState(0)
+  
+  
 
 
   //To get the current user details from local store to show the current user
   const loginUser = JSON.parse(localStorage.getItem("loginUser"));
   const currentUser =
     loginUser && loginUser.email.substring(0, loginUser.email.length - 10);
-  const currentUserCartItems=cartItems.filter(cartitem=>cartitem.currentUserInfo.userId===loginUser.uid)
+  const currentUserCartItems = cartItems.filter(item => item.cartitem.userId === loginUser.uid)
+  
+  useEffect(() => {
+    let temp = 0
+    currentUserCartItems.forEach(item => {
+      temp+=item.cartitem.itemCount
+    })
+    setCartItemCount(temp)
+    
+  },[currentUserCartItems])
 
   //Logout method to logout from current user session and removing login user details from store
   //also make the currnt sesson reload
@@ -59,7 +75,7 @@ const Header = () => {
                   </li>
                   <li className="nav-item">
                     <Link to="/cart" className="nav-link">
-                      <FaCartPlus /> {currentUserCartItems && currentUserCartItems.length}
+                      <FaCartPlus /> {cartItemCount}
                     </Link>
                   </li>
                   <li className="nav-item">

@@ -9,6 +9,7 @@ const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState("");
   const navigate = useNavigate();
 
   const auth = getAuth();
@@ -20,10 +21,12 @@ const Login = () => {
         toast.success("Login Successfull");
         localStorage.setItem("loginUser", JSON.stringify(user));
         navigate("/");
+        setError("");
       })
       .catch((error) => {
         setIsLoading(false);
         toast.error("Login failed");
+        setError(error);
       });
   };
 
@@ -38,43 +41,44 @@ const Login = () => {
   };
   return (
     <div className="login-page">
-        <div className="row justify-content-center">
-          <div className="col-md-4 z1">
-            <div className="login-form">
-              {isLoading && <Loader />}
-              <h1>Login</h1>
-              <hr />
-              <input
-                type="email"
-                name="email"
-                placeholder="Enter Email"
-                className="form-control"
-                onChange={(e) => handleChange(e)}
-              />
-              <input
-                type="password"
-                name="password"
-                placeholder="Enter Password"
-                className="form-control"
-                onChange={(e) => handleChange(e)}
-              />
-              <button onClick={loginUser}>Login</button>
-              <p>Don't have account?</p>
-              <Link to="/registration">Register Here</Link>
-            </div>
-          </div>
-          <div className="col-md-5 z1">
-            <lottie-player
-              src="https://assets5.lottiefiles.com/packages/lf20_57TxAX.json"
-              background="transparent"
-              speed="1"
-              loop
-              autoplay
-              class="lottiePlayer"
-            ></lottie-player>
+      <div className="row justify-content-center">
+        <div className="col-md-4 z1">
+          <div className="login-form">
+            {isLoading && <Loader />}
+            <h1>Login</h1>
+            <hr />
+            <input
+              type="email"
+              name="email"
+              placeholder="Enter Email"
+              className="form-control"
+              onChange={(e) => handleChange(e)}
+            />
+            <input
+              type="password"
+              name="password"
+              placeholder="Enter Password"
+              className="form-control"
+              onChange={(e) => handleChange(e)}
+            />
+            {/* {error && <p style={{ color: "red" }}>{error}</p>} */}
+            <button onClick={loginUser}>Login</button>
+            <p>Don't have account?</p>
+            <Link to="/registration">Register Here</Link>
           </div>
         </div>
-        <div className="login-bottom"></div>
+        <div className="col-md-5 z1">
+          <lottie-player
+            src="https://assets5.lottiefiles.com/packages/lf20_57TxAX.json"
+            background="transparent"
+            speed="1"
+            loop
+            autoplay
+            class="lottiePlayer"
+          ></lottie-player>
+        </div>
+      </div>
+      <div className="login-bottom"></div>
     </div>
     /* </div> */
   );

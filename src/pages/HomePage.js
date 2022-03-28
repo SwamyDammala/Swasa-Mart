@@ -3,41 +3,39 @@ import { Link } from "react-router-dom";
 import Layout from "../components/Layout/Layout";
 import { db } from "../firebase/firebase";
 import { collection, getDocs } from "firebase/firestore/lite";
-import ProductInfo from "./ProductInfo";
-import { useDispatch } from "react-redux";
-import { startAddItemsToCart } from "../redux/actions/actions";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
+import {
+  startAddItemsToCart,
+  startUpdateItemsFromCart,
+} from "../redux/actions/actions";
 import "./styles/productstyle.css";
 
 const HomePage = () => {
+  //To get the cart items from redux store
+  const { cartItems } = useSelector((state) => ({
+    cartItems: state.cartReducer,
+  }));
+
   //Initializing an empty state array for products
   const [products, setProducts] = useState([]);
-  const [productId, setProductId] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
+  //Initiliazing state variables for search funtionality
   const [searchProduct, setSearchProduct] = useState("");
   const [filterByCategory, setFilterByCategory] = useState("");
 
   //Current Login user Session details
-  const currentUserInfo={
+  const currentUserInfo = {
     email: JSON.parse(localStorage.getItem("loginUser")).email,
     userId: JSON.parse(localStorage.getItem("loginUser")).uid,
-  }
+  };
 
   const dispatch = useDispatch();
-  const { cartItems } = useSelector((state) => ({
-    cartItems: state.cartReducer.cartItems,
-  }));
 
   //We are getting the products for the first time component loaded
   useEffect(() => {
     getProducts();
   }, []);
-
-  //To update the local Store to based on everytime cartItems changes
-  useEffect(() => {
-    localStorage.setItem("cartItems", JSON.stringify(cartItems));
-  }, [cartItems]);
 
   //getting products from firebase
   const getProducts = async () => {
@@ -59,13 +57,7 @@ const HomePage = () => {
     }
   };
 
-  //To get the product Id for each product
-  const getProductId = (prodId) => {
-    setProductId(prodId);
-  };
-
-  //handle change method for search key words
-
+  //handle change method for search filter key words
   const handleChange = (e) => {
     e.preventDefault();
     const { name, value } = e.target;
@@ -82,14 +74,45 @@ const HomePage = () => {
   ];
 
   //Handle method for Adding cart items to database
-  const addItemsToCartMethod =  (prod) => {
-    const cartInfo = {
-      currentUserInfo,
-      prod
+  const updateItemsToCartMethod = (prod, updateState) => {
+    //checking whether the product is already exisiting in cart or not and if exists then we increase or decrease the itemcount
+    console.log("Checking from home page",prod)
+    const updatedInfo = cartItems
+      .filter((item) => item.cartitem.id === prod.id)
+      // eslint-disable-next-line array-callback-return
+      .map((item) => {
+        if (updateState === "add") {
+          return {
+            cartItemId: item.cartitem.cartitemId,
+            updatedItemCount:item.cartitem.itemCount+1
+          };
+        } else if (updateState === "remove") {
+          return {
+            cartItemId: item.cartitem.cartitemId,
+            updatedItemCount:item.cartitem.itemCount-1
+          };
+        }
+      });
+    
+    //dispatching method for add or update cart Items based on item count
+    //If above array length more than 1 then we will update or we will add as new cart item
+    if (updatedInfo.length > 0) {
+      dispatch(
+        startUpdateItemsFromCart(
+          updatedInfo[0].cartItemId,
+          updatedInfo[0].updatedItemCount,
+          updateState
+        )
+      );
+    } else {
+          const cartInfo = {
+            currentUserInfo,
+            prod,
+            itemCount: 1,
+          };
+      dispatch(startAddItemsToCart(cartInfo));
     }
-    dispatch(startAddItemsToCart(cartInfo))
-    console.log(cartInfo)
-  }
+  };
 
   return (
     <Layout loading={isLoading}>
@@ -151,15 +174,14 @@ const HomePage = () => {
                         </h2>
                         <div className="d-flex">
                           <button
-                            onClick={() => addItemsToCartMethod(product)}
+                            onClick={() =>
+                              updateItemsToCartMethod(product, "add")
+                            }
                             className="button mx-2 mb-1"
                           >
                             Add To Cart
                           </button>
-                          <button
-                            className="button mb-1"
-                            onClick={() => getProductId(product.id)}
-                          >
+                          <button className="button mb-1">
                             <Link to={`/productInfo/${product.id}`}>View</Link>
                           </button>
                         </div>
