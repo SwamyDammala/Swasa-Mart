@@ -226,16 +226,6 @@ const CartPage = () => {
                       <div className="d-flex">
                         <button
                           onClick={() =>
-                            handleUpdateCartItem(product.cartitem, "add")
-                          }
-                        >
-                          +
-                        </button>
-                        <p style={{ color: "red", fontWeight: "bold" }}>
-                          {product.cartitem.itemCount}
-                        </p>
-                        <button
-                          onClick={() =>
                             handleUpdateCartItem(
                               product.cartitem,
                               "remove",
@@ -244,6 +234,16 @@ const CartPage = () => {
                           }
                         >
                           -
+                        </button>
+                        <p style={{ color: "red", fontWeight: "bold" }}>
+                          {product.cartitem.itemCount}
+                        </p>
+                         <button
+                          onClick={() =>
+                            handleUpdateCartItem(product.cartitem, "add")
+                          }
+                        >
+                          +
                         </button>
                       </div>
                     </td>

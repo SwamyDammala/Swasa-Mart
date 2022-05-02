@@ -30,6 +30,11 @@ const HomePage = () => {
     userId: JSON.parse(localStorage.getItem("loginUser")).uid,
   };
 
+  //Filter our curent user cart items from all cart items
+  const currentUserCartItems = cartItems.filter(
+    (item) => item.cartitem.userId === currentUserInfo.userId
+  );
+
   const dispatch = useDispatch();
 
   //We are getting the products for the first time component loaded
@@ -76,8 +81,10 @@ const HomePage = () => {
   //Handle method for Adding cart items to database
   const updateItemsToCartMethod = (prod, updateState) => {
     //checking whether the product is already exisiting in cart or not and if exists then we increase or decrease the itemcount
-    console.log("Checking from home page",prod)
-    const updatedInfo = cartItems
+    console.log("Checking from home page", prod)
+    console.log(cartItems)
+    console.log(currentUserCartItems)
+    const updatedInfo = currentUserCartItems
       .filter((item) => item.cartitem.id === prod.id)
       // eslint-disable-next-line array-callback-return
       .map((item) => {
@@ -86,16 +93,11 @@ const HomePage = () => {
             cartItemId: item.cartitem.cartitemId,
             updatedItemCount:item.cartitem.itemCount+1
           };
-        } else if (updateState === "remove") {
-          return {
-            cartItemId: item.cartitem.cartitemId,
-            updatedItemCount:item.cartitem.itemCount-1
-          };
-        }
+        } 
       });
-    
+    console.log('Checking from home page',updatedInfo)
     //dispatching method for add or update cart Items based on item count
-    //If above array length more than 1 then we will update or we will add as new cart item
+    //If above array length more than 1 then we will update or we will add as new cart item in else condition
     if (updatedInfo.length > 0) {
       dispatch(
         startUpdateItemsFromCart(

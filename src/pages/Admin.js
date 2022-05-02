@@ -8,6 +8,7 @@ import {
   addDoc,
   getDocs,
   setDoc,
+  updateDoc,
   doc,
   deleteDoc,
 } from "firebase/firestore/lite";
@@ -78,7 +79,7 @@ const Admin = () => {
   const updateProduct = async () => {
     try {
       setIsLoading(true);
-      await setDoc(doc(db, "products", product.id), product);
+      await updateDoc(doc(db, "products", product.id), product);
       handleModal();
       toast.success("Product Updated Successfully");
       window.location.reload();

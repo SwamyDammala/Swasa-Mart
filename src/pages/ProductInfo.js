@@ -4,8 +4,8 @@ import { useState, useEffect } from "react";
 import { doc, getDoc } from "firebase/firestore/lite";
 import { useParams } from "react-router";
 import Layout from "../components/Layout/Layout";
-import { useDispatch } from "react-redux";
-import {  startAddItemsToCart } from "../redux/actions/actions";
+import { useDispatch,useSelector } from "react-redux";
+import {  startAddItemsToCart,startUpdateItemsFromCart } from "../redux/actions/actions";
 import { db } from "../firebase/firebase";
 
 const ProductInfo = (props) => {
@@ -13,6 +13,22 @@ const ProductInfo = (props) => {
   console.log(param);
   const [product, setProduct] = useState();
   const [isLoading, setIsLoading] = useState(false);
+
+   //To get the cart items from redux store
+   const { cartItems } = useSelector((state) => ({
+    cartItems: state.cartReducer,
+   }));
+
+     //Current Login user Session details
+     const currentUserInfo={
+      email: JSON.parse(localStorage.getItem("loginUser")).email,
+      userId: JSON.parse(localStorage.getItem("loginUser")).uid,
+    }
+  
+  //Filter our curent user cart items from all cart items
+  const currentUserCartItems = cartItems.filter(
+    (item) => item.cartitem.userId === currentUserInfo.userId
+  );
 
   const dispatch = useDispatch();
 
@@ -33,20 +49,38 @@ const ProductInfo = (props) => {
     }
   };
 
-   //Current Login user Session details
-   const currentUserInfo={
-    email: JSON.parse(localStorage.getItem("loginUser")).email,
-    userId: JSON.parse(localStorage.getItem("loginUser")).uid,
-  }
 
-  //Handle method for Adding cart items to database
-  const addItemsToCartMethod =  (prod) => {
+
+  //Adding or Removing cart items from cart page
+  const handleUpdateCartItem = (prod) => {
+    console.log("Checking this now", prod);
+    //getting exisiting product details in cart page into bewlo array based on product id
+    const updatedInfo = currentUserCartItems.filter(
+      (item) => item.cartitem.id === prod.id
+    );
+    //If we have only one itemcount for particular product and action is remove then we have to delete whole product from cart page since new item count will be zero
+
+    //else we can increase or decrease item count
+  if (updatedInfo[0].cartitem.itemCount >= 1) {
+      const updatedItemCount =updatedInfo[0].cartitem.itemCount + 1
+        dispatch(
+        startUpdateItemsFromCart(
+          updatedInfo[0].cartitem.cartitemId,
+          updatedItemCount,
+          "add"
+        )
+      );
+    }
+  else if (updatedInfo[0].cartitem.itemCount === 0) {
     const cartInfo = {
       currentUserInfo,
-      prod
+      prod,
+      itemCount: 1,
+    };
+    dispatch(startAddItemsToCart(cartInfo));
     }
-    dispatch(startAddItemsToCart(cartInfo))
-  }
+  };
+
 
   return (
     <Layout loading={isLoading}>
@@ -86,7 +120,7 @@ const ProductInfo = (props) => {
                 <div className="d-flex justify-content-end ml-3">
                   <button
                     className="button my-3"
-                    onClick={() =>addItemsToCartMethod(product)}
+                    onClick={() =>handleUpdateCartItem(product)}
                   >
                     Add To Cart
                   </button>
